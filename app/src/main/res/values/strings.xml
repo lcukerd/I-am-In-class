@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">I am in class</string>
+    <string name="app_name">app</string>
     <string name="title_activity_main_">Main_Activity</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>

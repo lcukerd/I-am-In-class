@@ -1,9 +1,18 @@
 package lcukerd.com.iaminclass;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -19,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -27,6 +37,8 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 public class Main_Activity extends AppCompatActivity
@@ -36,6 +48,7 @@ public class Main_Activity extends AppCompatActivity
     private ViewPager mViewPager;
     private DetectMode detector;
     private final String tag = "Main Activity";
+    private static Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -63,9 +76,12 @@ public class Main_Activity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });
-
-        startService(new Intent(this,DetectMode.class));
-
+        context = this;
+        mViewPager.setCurrentItem(1);
+        if (ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+        {
+                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+        }
     }
 
     protected void onDestroy()
@@ -118,7 +134,7 @@ public class Main_Activity extends AppCompatActivity
             if (getArguments().getInt(ARG_SECTION_NUMBER)==1)
             {
                 rootView = inflater.inflate(R.layout.fragment_main_today, container, false);
-                BarChart barChart = (BarChart) rootView.findViewById(R.id.barGraph);
+                /*BarChart barChart = (BarChart) rootView.findViewById(R.id.barGraph);
                 ArrayList<BarEntry> entries = new ArrayList<>();
                 entries.add(new BarEntry(0, 21));
                 entries.add(new BarEntry(1, 23));
@@ -141,12 +157,50 @@ public class Main_Activity extends AppCompatActivity
                 dataset.setColors(ColorTemplate.MATERIAL_COLORS);
                 BarData data = new BarData(dataset);
                 data.addDataSet(dataset2);
-                barChart.setData(data);
+                barChart.setData(data);*/
 
             }
             else if (getArguments().getInt(ARG_SECTION_NUMBER)==2)
             {
-                rootView =  inflater.inflate(R.layout.fragment_main_daily, container, false);
+                //rootView =  inflater.inflate(R.layout.fragment_main_daily, container, false);
+                rootView =  inflater.inflate(R.layout.tempfortest, container, false);
+                Button start ,stop, send;
+                start = (Button) rootView.findViewById(R.id.textView);
+                stop = (Button) rootView.findViewById(R.id.textView6);
+                send = (Button) rootView.findViewById(R.id.textView7);
+                send.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        Intent email = new Intent(Intent.ACTION_SEND);
+                        email.putExtra(Intent.EXTRA_EMAIL, new String[]{ "Harshit05081997@gmail.com"});
+                        email.putExtra(Intent.EXTRA_SUBJECT, "Nothing");
+                        email.putExtra(Intent.EXTRA_TEXT, "Nothing");
+                        email.setType("*/*");
+                        File file = new File(Environment.getExternalStorageDirectory() + "/" +  "samplefile.txt");
+                        Uri path = Uri.fromFile(file);
+                        email.putExtra(Intent.EXTRA_STREAM,path);
+                        startActivity(Intent.createChooser(email, "Choose an Email client :"));
+                    }
+                });
+                start.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        context.startService(new Intent(context,DetectMode.class));
+                    }
+                });
+                stop.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        context.stopService(new Intent(context,DetectMode.class));
+                    }
+                });
+
             }
             else if (getArguments().getInt(ARG_SECTION_NUMBER)==1)
             {
