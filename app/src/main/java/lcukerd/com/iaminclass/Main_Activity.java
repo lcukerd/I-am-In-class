@@ -175,7 +175,7 @@ public class Main_Activity extends AppCompatActivity
                     {
                         Intent email = new Intent(Intent.ACTION_SEND);
                         email.putExtra(Intent.EXTRA_EMAIL, new String[]{ "Harshit05081997@gmail.com"});
-                        email.putExtra(Intent.EXTRA_SUBJECT, "Nothing");
+                        email.putExtra(Intent.EXTRA_SUBJECT, "TEST");
                         email.putExtra(Intent.EXTRA_TEXT, "Nothing");
                         email.setType("*/*");
                         File file = new File(Environment.getExternalStorageDirectory() + "/" +  "samplefile.txt");

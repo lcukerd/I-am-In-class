@@ -182,7 +182,7 @@ public class DetectMode extends Service implements SensorEventListener
     {
         float g = (float) Math.sqrt(x*x+y*y+z*z);
         String temp;
-        if (((z>=8.5)||(z<=-9))&&(g>9.4)&&(g<=11))                                                  //sitting straight or phone on table
+        if (((z>=8.5)||(z<=-9))&&(g>9.3)&&(g<=11))                                                  //sitting straight or phone on table
         {
             if ((x<=1.5)&&(x>=-1.5)&&(screenon==true))                                              //using phone ***"Show notificaiton"*** set to not in class
             {
@@ -199,7 +199,7 @@ public class DetectMode extends Service implements SensorEventListener
                 return 0;
             }
         }
-        else if ((y>9)||(y<-9)||(g<9.5))                                                            //standing
+        else if (((y>9)||(y<-9))&&(g<11)&&(g>9.4))                                                            //standing
         {
             temp = "Normal Standing";
             setpose(temp);
@@ -264,7 +264,7 @@ public class DetectMode extends Service implements SensorEventListener
         String time = sdf.format(Calendar.getInstance().getTime());
         Log.d(tag,time);
         try {
-            osw.append(time + " : " + data + System.getProperty("line.separator"));
+            osw.append(time + " : " + data + "\n");
         }
         catch (Exception e)
         {
