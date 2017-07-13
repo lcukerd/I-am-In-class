@@ -7,10 +7,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -39,29 +41,13 @@ public class DetectMode extends Service implements SensorEventListener
     private Sensor accelerometer;
     private Calendar calendar;
     private long time;
-    private float history[][];
-    private int counter=0,size = 60 ,j;
+    private int size = 60, mode = -1;
     private final String tag = "Detector";
     private boolean screenon = true;
     private OutputStreamWriter osw;
     private String currentPose,currentval;
+    private DBinteract interact;
 
-    /*public DetectMode(Context context)
-    {
-        calendar = Calendar.getInstance();
-        time = calendar.getTimeInMillis();
-        history = new float[10][3];
-        sensorManager = (SensorManager) context.getSystemService(context.SENSOR_SERVICE);
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this,accelerometer,2000);
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        BroadcastReceiver mReceiver = new ScreenReceiver();
-        context.registerReceiver(mReceiver, filter);
-
-        if (accelerometer==null)
-            Toast.makeText(context,"No Sensor",Toast.LENGTH_SHORT).show();                          // Show error in dialogbox
-    }*/
     @Override
     public void onCreate() {
         mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
@@ -73,7 +59,7 @@ public class DetectMode extends Service implements SensorEventListener
     public int onStartCommand(Intent intent, int flags, int startId) {
         calendar = Calendar.getInstance();
         time = calendar.getTimeInMillis();
-        history = new float[size][3];
+        interact = new DBinteract(this);
         sensorManager = (SensorManager) this.getSystemService(this.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this,accelerometer,2000);
@@ -104,7 +90,7 @@ public class DetectMode extends Service implements SensorEventListener
         }
         mNM.cancel(105);
         sensorManager.unregisterListener(this);
-        Toast.makeText(this,"app stopped!!" , Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,"I am in Class stopped!!" , Toast.LENGTH_SHORT).show();
     }
 
     private void showNotification()
@@ -144,102 +130,101 @@ public class DetectMode extends Service implements SensorEventListener
         {
             int sit=0,stand=0;
             float x,y,z;
-            x=history[counter][0] = event.values[0];
-            y=history[counter][1] = event.values[1];
-            z=history[counter++][2] = event.values[2];
+            x=event.values[0];
+            y=event.values[1];
+            z=event.values[2];
             float g = (float) Math.sqrt(x*x+y*y+z*z);
-            currentval = Float.toString(x)+" "+Float.toString(y)+" " +Float.toString(z)+" "+Float.toString(g);
-            Log.d(tag  + "data",currentval);
-
-            for (j=0;j<size;j++)
+            currentval = Float.toString(x).substring(0,3)+" "+Float.toString(y).substring(0,4)+" " +Float.toString(z).substring(0,4)+" "+Float.toString(g).substring(0,4);
+            interact.addacceleration(posedetect(x,y,z,g),x,y,z,g);
+            Cursor cursor = interact.readfromDB(1,eventDBcontract.ListofItem.columnID + " DESC");
+            for (int j=0;j<size;j++)
             {
-                int state = posedetect(history[j][0],history[j][1],history[j][2]);
+                int state=0;
+                if(cursor.moveToNext())
+                    state = cursor.getInt(cursor.getColumnIndex(eventDBcontract.ListofItem.columnstate));
                 if (state==0)
                     sit++;
                 else if (state==1)
                     stand++;
             }
+
             String temp;
+            int tempmode = -2;
             if (sit>size/2-1)
+            {
+                tempmode = 0;                                                                       //ask in setting if to silent or vibrate in class
                 temp = "Sitting";
+            }
             else if (stand>size/2-1)
+            {
+                tempmode = 2;
                 temp = "Standing";
+            }
             else
                 temp = "Don't Know";
-            writetofile(temp +" " + currentPose + " " + currentval);
-            if (counter==size)
-                counter=0;
-
+            if (tempmode != mode)                                                                   // ask in setting if mode should change
+                setaudiomode(tempmode);                                                             // back automatically when change explicitly
+            mode = tempmode;
+            Log.d(tag  + "data",currentval + " " + currentPose + " " + temp + " " + String.valueOf(mode)+ " " + String.valueOf(tempmode));
+            //writetofile(temp +" " + currentPose + " " + currentval);                              // write only in case of error
             time = calendar.getTimeInMillis();
-        }
-        else
-        {
-            //Log.d("Time ",Long.toString(calendar.getTimeInMillis())+" "+ Long.toString(time));
         }
     }
 
-    private int posedetect(float x, float y, float z)
+    private int posedetect(float x, float y, float z,float g)
     {
-        float g = (float) Math.sqrt(x*x+y*y+z*z);
         String temp;
         if (((z>=8.5)||(z<=-9))&&(g>9.3)&&(g<=11))                                                  //sitting straight or phone on table
         {
             if ((x<=1.5)&&(x>=-1.5)&&(screenon==true))                                              //using phone ***"Show notificaiton"*** set to not in class
             {
                 temp = "using phone";
-                setpose(temp);
+                currentPose = temp;
                 Log.d(tag,temp);
                 return 0;
             }
             else
             {
                 temp = "Normal Sitting";
-                setpose(temp);
                 Log.d(tag,temp);
+                currentPose = temp;
                 return 0;
             }
         }
         else if (((y>9)||(y<-9))&&(g<11)&&(g>9.4))                                                            //standing
         {
             temp = "Normal Standing";
-            setpose(temp);
             Log.d(tag,temp);
+            currentPose = temp;
             return 1;
         }
         else if (((g>10)&&((x>9.8)||(y>9.8)||(z>9.8)||(x<-9.8)||(y<-9.8)||(z<-9.8))))               //walking
         {
             temp = "Walking";
-            setpose(temp);
             Log.d(tag,temp);
+            currentPose = temp;
             return 1;
         }
         else if (((x<9.9)&&(x>9.0))||((x>-9.9)&&(x<-9.0)))                                                                 //phone in hand(hand laying beside leg) while standing
         {
             temp = "Phone in hand while standing";
-            setpose(temp);
             Log.d(tag,temp);
+            currentPose = temp;
             return 1;
         }
         else if (((x<2.2)&&(x>-2))&&(g>9.4)&&(g<=11))                                                // 4.299643 -3.112195 -8.340738 9.886385 (sitting with leg folded)
         {
             temp = "sitting with leg folded";
-            setpose(temp);
             Log.d(tag,temp);
+            currentPose = temp;
             return 0;
         }
         else
         {
             temp = "No condition satisfied";
-            setpose(temp);
             Log.d(tag,temp);
-            return 2;
-        }
-    }
-    private void setpose(String temp)
-    {
-        if (j==counter-1)
-        {
             currentPose = temp;
+            return 2;
         }
     }
 
@@ -270,6 +255,16 @@ public class DetectMode extends Service implements SensorEventListener
         {
             Log.e(tag,"File Write error",e);
         }
+    }
+    private void setaudiomode(int mode)
+    {
+        AudioManager audiomanage = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        if (mode == 0)
+            audiomanage.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
+        else if (mode == 1)
+            audiomanage.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+        else if (mode == 2)
+            audiomanage.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
     }
 
 

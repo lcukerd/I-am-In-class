@@ -12,20 +12,24 @@ import android.util.Log;
 
 public class eventDBcontract extends SQLiteOpenHelper{
 
-    private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + ListofItem.tableName + " (" +
+    private static final String SQL_CREATE_ENTRIES1 =
+            "CREATE TABLE " + ListofItem.tableName1 + " (" +
                     ListofItem.columnID + " INTEGER PRIMARY KEY," +
-                    ListofItem.columnEvent + " TEXT, " +
-                    ListofItem.columnName + " TEXT, " +
-                    ListofItem.columntaken + " INTEGER," +
-                    ListofItem.columnreturn + " INTEGER, " +
-                    ListofItem.columnFileloc + " TEXT, " +
-                    ListofItem.columndatetime + " INTEGER, " +
-                    ListofItem.columnnotes + " TEXT );";
-    private ContentValues values;
+                    ListofItem.columnstate + " INTEGER, " +
+                    ListofItem.columnx + " REAL, " +
+                    ListofItem.columny + " REAL," +
+                    ListofItem.columnz + " REAL, " +
+                    ListofItem.columng + " REAL );";
+    private static final String SQL_CREATE_ENTRIES2 =
+            "CREATE TABLE " + ListofItem.tableName2 + " (" +
+                    ListofItem.columnID + " INTEGER PRIMARY KEY," +
+                    ListofItem.columndate + " INTEGER, " +
+                    ListofItem.columnstart + " INTEGER, " +
+                    ListofItem.columnend + " INTEGER," +
+                    ListofItem.columnnote + " TEXT );";
 
     public static int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "ClassRecord.db";
+    public static final String DATABASE_NAME = "Iaminclass.db";
 
     public eventDBcontract(Context context)
     {
@@ -33,13 +37,9 @@ public class eventDBcontract extends SQLiteOpenHelper{
     }
     public void onCreate(SQLiteDatabase db)
     {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        db.execSQL(SQL_CREATE_ENTRIES1);
+        db.execSQL(SQL_CREATE_ENTRIES2);
         Log.d("Database","created");
-        for (int i=0;i<9;i++) {
-            values = new ContentValues();
-            db.insert(eventDBcontract.ListofItem.tableName, null, values);
-        }
-
     }
 
     public void onUpgrade(SQLiteDatabase db,int oldVersion , int newVersion)
@@ -48,15 +48,18 @@ public class eventDBcontract extends SQLiteOpenHelper{
 
     public static class ListofItem
     {
-        public static final String tableName = "ClassRecord",
+        public static final String tableName1 = "dayrecord",
                 columnID="ID",
-                columnEvent = "Name_of_event",
-                columntaken = "Item_taken",
-                columnreturn = "Item_brought_back",
-                columnName = "Name_of_Item",
-                columnFileloc = "File_Location",
-                columndatetime = "Creation_millisec",
-                columnnotes = "Note";
+                columnx = "X",
+                columny = "Y",
+                columnz = "Z",
+                columng = "G",
+                columnstate = "state";
+        public static final String tableName2 = "LifetimeRecord",
+                columnstart = "Start",
+                columnend = "End",
+                columnnote = "Note",
+                columndate = "Date";
     }
 }
 

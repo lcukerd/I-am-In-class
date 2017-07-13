@@ -89,13 +89,11 @@
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_alignBottom="@+id/TimingTextView"
-                android:layout_alignParentStart="true"
-                android:layout_marginBottom="10dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginTop="10dp"
-                app:srcCompat="@android:color/holo_orange_dark"/>
+                app:srcCompat="@android:color/holo_orange_dark"
+                android:layout_alignTop="@+id/imageView"
+                android:layout_alignParentStart="true"/>
 
             <ImageView
                 android:layout_width="20dp"
@@ -106,7 +104,8 @@
                 android:layout_marginRight="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_toStartOf="@+id/textView5"
-                app:srcCompat="@android:color/holo_orange_dark"/>
+                app:srcCompat="@android:color/holo_orange_dark"
+                android:id="@+id/imageView"/>
         </RelativeLayout>
 
         <ExpandableListView
@@ -121,13 +120,73 @@
 
         </com.github.mikephil.charting.charts.BarChart>
 
-        <LinearLayout
+        <EditText
+            android:id="@+id/note"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
+            android:ems="10"
+            android:hint="@string/note_hint"
+            android:inputType="textMultiLine"
+            android:textSize="16sp"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/weather3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/weather2"
+                android:layout_below="@+id/weather2"
+                android:text="Drizzle"/>
+
+            <TextView
+                android:id="@+id/weather2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/weather1"
+                android:layout_below="@+id/weather1"
+                android:text="21"
+                android:textSize="24sp"/>
+
+            <TextView
+                android:id="@+id/weather1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/imageView2"
+                android:layout_marginStart="26dp"
+                android:layout_toEndOf="@+id/imageView2"
+                android:text="@string/weather1"
+                android:textColor="#000000"
+                android:textSize="18sp"/>
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginTop="20dp"
+                app:srcCompat="@drawable/togglebutton_on"/>
+
+            <TextView
+                android:id="@+id/weatherunit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/weather1"
+                android:layout_toEndOf="@+id/weather2"
+                android:text="C"
+                android:textSize="8sp"/>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="horizontal">
 
             <ToggleButton
-                android:id="@+id/toggleButton3"
+                android:id="@+id/ForceSilent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="40dp"
@@ -135,20 +194,20 @@
                 android:layout_marginRight="20dp"
                 android:layout_marginTop="40dp"
                 android:layout_weight="1"
-                android:checked="true"
+                android:background="@drawable/selector"
                 android:textOff="Force Silent"
                 android:textOn="Force Silent"/>
 
             <ToggleButton
-                android:id="@+id/toggleButton"
+                android:id="@+id/ForceNormal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="40dp"
+                android:layout_marginBottom="100dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginTop="40dp"
                 android:layout_weight="1"
-                android:checked="true"
+                android:background="@drawable/selector"
                 android:text="ToggleButton"
                 android:textOff="Force  Normal"
                 android:textOn="Force  Normal"/>

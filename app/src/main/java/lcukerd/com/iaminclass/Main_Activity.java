@@ -49,6 +49,7 @@ public class Main_Activity extends AppCompatActivity
     private DetectMode detector;
     private final String tag = "Main Activity";
     private static Context context;
+    private DBinteract interact;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -56,8 +57,6 @@ public class Main_Activity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_tab);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -77,7 +76,8 @@ public class Main_Activity extends AppCompatActivity
             }
         });
         context = this;
-        mViewPager.setCurrentItem(1);
+        interact = new DBinteract(this);
+        //interact.readfromDB(1,eventDBcontract.ListofItem.columnID + " DESC");
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
         {
                 ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
@@ -134,7 +134,7 @@ public class Main_Activity extends AppCompatActivity
             if (getArguments().getInt(ARG_SECTION_NUMBER)==1)
             {
                 rootView = inflater.inflate(R.layout.fragment_main_today, container, false);
-                /*BarChart barChart = (BarChart) rootView.findViewById(R.id.barGraph);
+                BarChart barChart = (BarChart) rootView.findViewById(R.id.barGraph);
                 ArrayList<BarEntry> entries = new ArrayList<>();
                 entries.add(new BarEntry(0, 21));
                 entries.add(new BarEntry(1, 23));
@@ -157,7 +157,7 @@ public class Main_Activity extends AppCompatActivity
                 dataset.setColors(ColorTemplate.MATERIAL_COLORS);
                 BarData data = new BarData(dataset);
                 data.addDataSet(dataset2);
-                barChart.setData(data);*/
+                barChart.setData(data);
 
             }
             else if (getArguments().getInt(ARG_SECTION_NUMBER)==2)
